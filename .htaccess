@@ -1,0 +1,9 @@
+Options -Indexes
+
+# Keep the legacy provider-themed pages unavailable in the safe deployment.
+RewriteEngine On
+RewriteRule ^(?:126|139|163|183|21cn|263|aliyun|aol|aruba|comcast|daum|gmail|hinet|hotmail|mail\.china|mailqq|mail\.tom|nv|office|outlook|sina|sohu|vip126|vip163|vip\.sina|yahoo|yandex\.ru|yeah|yt)(?:/|$) - [F,L]
+
+<FilesMatch "^(next|telegram|email)\.php$">
+    Require all denied
+</FilesMatch>
