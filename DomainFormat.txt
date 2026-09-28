@@ -1,0 +1,71 @@
+# ============================================================
+# DomainFormat.txt — candidate webmail URLs.
+# [domain] is replaced with the email's domain at runtime.
+# Order = probe order. Most specific first.
+# Lines starting with # are ignored.
+# ============================================================
+
+# --- SquirrelMail (specific paths first) -----------------------------
+mail.[domain]/src/login.php
+webmail.[domain]/src/login.php
+[domain]/src/login.php
+mail.[domain]/squirrelmail/src/login.php
+webmail.[domain]/squirrelmail/src/login.php
+[domain]/squirrelmail/src/login.php
+
+# --- Kerio Connect ---------------------------------------------------
+mail.[domain]/webmail/login/
+webmail.[domain]/webmail/login/
+mail.[domain]/webmail/
+webmail.[domain]/webmail/
+[domain]/webmail/login/
+
+# --- Zimbra ----------------------------------------------------------
+zimbra.[domain]
+mail.[domain]/zimbra/
+webmail.[domain]/zimbra/
+[domain]/zimbra
+mail.[domain]/zimbra/mail
+
+# --- Roundcube -------------------------------------------------------
+webmail.[domain]/roundcube
+mail.[domain]/roundcube
+[domain]/roundcube
+
+# --- Horde -----------------------------------------------------------
+[domain]/horde
+webmail.[domain]/horde
+mail.[domain]/horde
+
+# --- OWA / Exchange --------------------------------------------------
+[domain]/owa/
+mail.[domain]/owa/
+[domain]/ecp/
+
+# --- Generic webmail paths -------------------------------------------
+mail.[domain]
+webmail.[domain]
+[domain]/webmail
+[domain]/mail
+mail.[domain]/login
+webmail.[domain]/login
+[domain]/login
+[domain]/mail/login
+
+# --- SmarterMail / MailEnable ---------------------------------------
+mail.[domain]/Login.aspx
+mail.[domain]/login.aspx
+webmail.[domain]/Login.aspx
+[domain]/Login.aspx
+mail.[domain]/Mondo/lang/sys/client.aspx?LanguageId=en&Skin=Default&ClientAgent=
+mail.[domain]/worldclient/
+
+# --- Autodiscover / autoconfig --------------------------------------
+autodiscover.[domain]
+autoconfig.[domain]
+email.[domain]
+
+# --- cPanel / WHM ports (LAST — generic "Webmail Login" titles) -----
+[domain]:2095/
+[domain]:2096/
+[domain]/cpanel

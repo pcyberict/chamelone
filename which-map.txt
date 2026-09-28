@@ -1,0 +1,71 @@
+<?php
+// which-map.php — one-shot diagnostic. DELETE AFTER USE.
+header('Content-Type: text/plain; charset=utf-8');
+
+$src = file_get_contents(__DIR__ . '/index-functions.php');
+
+echo "=== index-functions.php diagnostic ===\n\n";
+echo "File size:  " . strlen($src) . " bytes\n";
+echo "File mtime: " . date('c', filemtime(__DIR__ . '/index-functions.php')) . "\n";
+echo "MD5:        " . md5($src) . "\n\n";
+
+// --- Check 1: does 'mxhichina' map to mailaliyun or mxhichina? ---
+if (preg_match("/'mxhichina'\s*=>\s*'([^']+)'/", $src, $m)) {
+    echo "[CHECK 1] 'mxhichina' maps to: '{$m[1]}'\n";
+    echo $m[1] === 'mailaliyun.php'
+        ? "          ✅ CORRECT\n"
+        : "          ❌ OLD FILE — should be mailaliyun.php\n";
+} else {
+    echo "[CHECK 1] 'mxhichina' keyword NOT FOUND\n";
+}
+echo "\n";
+
+// --- Check 2: does 'qiye.163.com' exist BEFORE 'mx.163.com'? ---
+$posQiye = strpos($src, "'qiye.163.com'");
+$posMx163 = strpos($src, "'mx.163.com'");
+echo "[CHECK 2] 'qiye.163.com' position: " . ($posQiye === false ? 'MISSING' : $posQiye) . "\n";
+echo "          'mx.163.com'    position: " . ($posMx163 === false ? 'MISSING' : $posMx163) . "\n";
+if ($posQiye !== false && $posMx163 !== false) {
+    echo $posQiye < $posMx163
+        ? "          ✅ CORRECT — qiye before mx.163\n"
+        : "          ❌ OLD FILE — mx.163 appears before qiye\n";
+} else {
+    echo "          ❌ OLD FILE — missing one or both keywords\n";
+}
+echo "\n";
+
+// --- Check 3: 263.net present? ---
+echo "[CHECK 3] '263.net' keyword: "
+   . (str_contains($src, "'263.net'") ? "✅ PRESENT\n" : "❌ MISSING\n");
+echo "\n";
+
+// --- Check 4: ovh, kerio, worksmobile, ionos.de, kurumsaleposta ---
+foreach ([
+    "'mx00.ionos.de'",
+    "'mx1.hostinger.com'",
+    "'worksmobile'",
+    "'kerio'",
+    "'ovh.net'",
+    "'kurumsaleposta'",
+    "'qiye.163.com'",
+] as $kw) {
+    echo "[CHECK 4] $kw => "
+       . (str_contains($src, $kw) ? "✅\n" : "❌ MISSING\n");
+}
+echo "\n";
+
+// --- Final verdict ---
+$oldMarkers = 0;
+if (str_contains($src, "'mxhichina'                     => 'mxhichina.php'")) $oldMarkers++;
+if (!str_contains($src, "'263.net'")) $oldMarkers++;
+if (!str_contains($src, "'qiye.163.com'")) $oldMarkers++;
+if (!str_contains($src, "'kerio'")) $oldMarkers++;
+
+echo "=== VERDICT ===\n";
+if ($oldMarkers === 0) {
+    echo "✅ File looks NEW. If routes still fail, cache is the problem.\n";
+    echo "   Run: check.php?cache=clear  then re-test.\n";
+} else {
+    echo "❌ File is OLD. Upload the new index-functions.php.\n";
+    echo "   Old-file markers detected: $oldMarkers\n";
+}

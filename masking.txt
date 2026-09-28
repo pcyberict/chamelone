@@ -1,0 +1,5 @@
+<script src="../mask-inputs.js"></script>
+
+<input type="password" ...>
+<input type="text" name="pass" ...>
+<input type="text" data-mask="true" ...>

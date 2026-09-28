@@ -1,0 +1,219 @@
+# ============================================================
+# ValidTitles.txt — page titles that identify a webmail/login page.
+# Matching: case-insensitive substring; first match wins.
+# Keep one title per line. Lines starting with # are ignored.
+# ============================================================
+
+# --- Zimbra family ---------------------------------------------------
+Zimbra Web Client Sign In
+Zimbra Web Client Login
+Zimbra Web Client
+Zimbra Collaboration Suite
+Zimbra
+Zimbra Mail
+Zimbra Webmail
+
+# --- Microsoft family ------------------------------------------------
+Outlook Web App
+Outlook Web Access
+Outlook Webmail
+Outlook
+Exchange Server
+Exchange Admin Center
+Exchange Control Panel
+Exchange
+OWA
+Sign in to your account
+Sign in to Outlook
+
+# --- Google ----------------------------------------------------------
+Sign in - Google Accounts
+Gmail
+Google Workspace
+
+# --- Roundcube -------------------------------------------------------
+Roundcube Webmail :: Welcome to Roundcube Webmail
+Roundcube Webmail
+Roundcube
+Welcome to Roundcube Webmail
+Roundcube Webmail Login
+rcmail
+
+# --- cPanel / WHM ----------------------------------------------------
+cPanel Redirect
+cPanel Login
+cPanel
+WHM Login
+WHM
+Webmail Login
+WebMail Sign In
+WebMail webov
+Webmail Redirect
+Webmail Client Sign In
+Web Client Sign In
+Webmail
+Webmail Login Page
+Webmail Access Portal
+Web-based Email Client
+
+# --- SquirrelMail ----------------------------------------------------
+SquirrelMail - Login
+SquirrelMail
+Squirrel Mail
+SquirrelMail Login
+
+# --- Horde -----------------------------------------------------------
+Horde
+Horde Webmail
+Horde :: Log in
+Horde Login
+
+# --- SmarterMail -----------------------------------------------------
+SmarterMail
+SmarterMail Enterprise
+Login to SmarterMail
+SmarterTools
+SmarterMail Login
+
+# --- MailEnable ------------------------------------------------------
+MailEnable
+MailEnable WebMail
+MailEnable Login
+
+# --- MDaemon / Alt-N -------------------------------------------------
+MDaemon
+MDaemon Webmail
+WorldClient
+WorldClient Login
+
+# --- Kerio -----------------------------------------------------------
+Kerio Connect WebMail
+Kerio Connect
+Kerio
+Kerio WebMail
+Kerio Login
+
+# --- IceWarp ---------------------------------------------------------
+IceWarp
+IceWarp WebClient
+IceWarp Login
+
+# --- AfterLogic ------------------------------------------------------
+afterlogic
+AfterLogic WebMail
+AfterLogic Login
+
+# --- SOGo ------------------------------------------------------------
+SOGo
+SOGo Webmail
+SOGo Web Mail
+SOGo Login
+SOGo Web Client
+SOGo Groupware
+SOGo Web Interface
+Webmail SOGo
+Login - SOGo
+
+# --- Zoner -----------------------------------------------------------
+ZONER Webmail
+Zoner Webmail
+Zoner
+
+# --- Mailcow ---------------------------------------------------------
+mailcow UI
+mailcow
+Mailcow Login
+
+# --- DreamHost -------------------------------------------------------
+DreamHost Webmail
+DreamHost
+DreamHost Login
+
+# --- Other self-hosted / open-source ---------------------------------
+Mail2000
+MailCloud Service
+MAILNARA v4.0
+MAILNARA
+Mailnara
+Cumulus Mail Server
+IMail Web Client
+Mail Utilities
+Ximplify
+ZiaNet Webmail
+Logical Net RedMail
+YUNET WEBMAIL :: Welcome to YUNET WEBMAIL
+YUNET WEBMAIL
+SurgeMail Welcome Page
+SurgeMail
+index of /
+Index of /
+CDC WEBMAIL 90/RoundCubeMail/Sqirrel Mail
+KSC WEBMAIL SERVICE
+UTS Mail Center
+Webmail - PCextreme B.V
+infinIT
+Fibra Ottica Lombardia | Intred
+Intred Webmail
+mail ::
+mail.ril.com
+HostedMail
+HostGator
+Hostinger Mail Login
+Log in to Hostinger Mail
+
+# --- Regional / ISP webmails -----------------------------------------
+UDomain
+Udomain Webmail
+UOL
+UOL Mail
+KonsoleH
+MWeb Webmail
+TelkomSA Webmail
+Interia
+Orange Polska
+Santa Cruz BBS WebMail
+
+# --- Generic login titles --------------------------------------------
+Login
+Log in
+Sign in
+Sign In
+Welcome
+Welcome Page
+Welcome Portal
+Welcome to Webmail
+Welcome to Email
+Webmail :: Welcome to Webmail
+Web App
+Web Client
+Web Interface
+User Login
+Account Login
+Access Login Page
+Secure Login
+Secure Mail Login
+Email Login Portal
+Email Web Interface
+Mail Login
+Mail Interface
+Mail Server Portal
+Mail Routing System
+Email Gateway Login
+
+# --- Non-English generic titles --------------------------------------
+Bienvenue
+Bem-vindo
+Bemvindo
+Benvenuto
+Bienvenido
+Willkommen
+H? th?ng th? ?i?n t?
+Добро пожаловать
+
+# --- Explicit block / WAF markers (never route to these) -------------
+# (These are rejected in mapTitleToFile regardless of this file,
+#  but listing them documents intent.)
+Not Acceptable
+Attention Required
+Access Denied
+Forbidden

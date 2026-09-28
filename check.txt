@@ -1,0 +1,182 @@
+<?php
+// ============================================================
+// check.php — Temporary debug + cache clear. DELETE AFTER USE.
+// ============================================================
+header('Content-Type: text/plain; charset=utf-8');
+
+echo "=== check.php ===\n";
+echo "Time: " . date('c') . "\n";
+echo "Root: " . __DIR__ . "\n\n";
+
+// ------------------------------------------------------------
+// 1. File state
+// ------------------------------------------------------------
+$f = __DIR__ . '/index-functions.php';
+echo "=== index-functions.php ===\n";
+if (!file_exists($f)) {
+    echo "MISSING! Upload it first.\n";
+    exit;
+}
+echo "mtime: " . date('c', filemtime($f)) . "\n";
+echo "size:  " . filesize($f) . " bytes\n\n";
+
+$c = file_get_contents($f);
+
+// Check the ORDER of critical blocks
+$pos_cpanel_first = strpos($c, "cPanel FIRST");
+$pos_smarter_strict = strpos($c, "SmarterMail — strict");
+$pos_cpcalendars = strpos($c, "'cpcalendars'");
+
+echo "=== Block positions (must NOT be 'NOT FOUND') ===\n";
+echo "cPanel FIRST comment: " . ($pos_cpanel_first !== false ? $pos_cpanel_first : 'NOT FOUND') . "\n";
+echo "SmarterMail strict:   " . ($pos_smarter_strict !== false ? $pos_smarter_strict : 'NOT FOUND') . "\n";
+echo "cpcalendars needle:   " . ($pos_cpcalendars !== false ? $pos_cpcalendars : 'NOT FOUND') . "\n\n";
+
+echo "=== Bad needles still present? (both must be 'no') ===\n";
+echo "'smarter'       => 'smarter.php': " . (strpos($c, "'smarter'       => 'smarter.php'") !== false ? 'YES (BAD)' : 'no') . "\n";
+echo "'smartmail'     => 'smarter.php': " . (strpos($c, "'smartmail'") !== false ? 'YES (BAD)' : 'no') . "\n";
+echo "bare ctl00_ in matchBodySignatures: " . (preg_match("/str_contains\(\\\$h, 'id=\"ctl00_'\)/", $c) ? 'YES (BAD)' : 'no') . "\n\n";
+
+// ------------------------------------------------------------
+// 2. Clear route cache BEFORE routing test
+// ------------------------------------------------------------
+echo "=== Clearing route cache ===\n";
+$tmpDir = sys_get_temp_dir();
+$files = glob($tmpDir . '/webmail_route_*.txt');
+$cleared = 0;
+if ($files) {
+    foreach ($files as $cf) {
+        $size = @filesize($cf) ?: 0;
+        if (@unlink($cf)) {
+            $cleared++;
+            echo "  deleted: " . basename($cf) . " ($size bytes)\n";
+        } else {
+            echo "  FAILED: " . basename($cf) . "\n";
+        }
+    }
+} else {
+    echo "  (none found in $tmpDir)\n";
+}
+echo "Total cleared: $cleared\n\n";
+
+// Also clear wlog/probe_cache if it exists
+$probeDir = __DIR__ . '/wlog/probe_cache';
+if (is_dir($probeDir)) {
+    $pf = glob($probeDir . '/*');
+    if ($pf) {
+        foreach ($pf as $p) {
+            if (is_file($p)) @unlink($p);
+        }
+        echo "Cleared wlog/probe_cache: " . count($pf) . " files\n";
+    } else {
+        echo "wlog/probe_cache: (empty)\n";
+    }
+} else {
+    echo "wlog/probe_cache: (does not exist)\n";
+}
+
+// Clear PSL cache
+$psl = __DIR__ . '/psl_cache.dat';
+if (file_exists($psl)) {
+    @unlink($psl);
+    echo "Cleared psl_cache.dat\n";
+}
+
+echo "\n";
+
+// ------------------------------------------------------------
+// 3. OPcache reset
+// ------------------------------------------------------------
+echo "=== OPcache ===\n";
+if (function_exists('opcache_reset')) {
+    $status = @opcache_get_status(false);
+    if (is_array($status) && !empty($status['opcache_enabled'])) {
+        echo @opcache_reset() ? "  reset OK\n" : "  reset FAILED\n";
+    } else {
+        echo "  enabled but not active\n";
+    }
+} else {
+    echo "  not available\n";
+}
+echo "\n";
+
+// ------------------------------------------------------------
+// 4. Load the functions file and run routing tests
+// ------------------------------------------------------------
+echo "=== Loading index-functions.php ===\n";
+require_once $f;
+echo "  loaded OK\n\n";
+
+// Test domains — edit this list to test your own
+$test_emails = [
+    'sales@disc.ie',            // SmarterMail (MailAnyone relay)
+    'test@apart-rent.com',      // Explicit cPanel route
+    'info@alimexports.com',     // SmarterMail (direct probe)
+    'test@' . 'cpanelsite.example',  // generic cPanel-style
+    'test@' . 'gmail.com',      // sanity: should match google MX
+    'test@' . 'zoho.com',       // sanity: should match zoho
+];
+
+echo "=== Routing tests ===\n";
+foreach ($test_emails as $email) {
+    $result = getMxFile($email);
+    printf("  %-40s => %s\n", $email, var_export($result, true));
+}
+echo "\n";
+
+// ------------------------------------------------------------
+// 5. Detailed DNS inspection for a specific domain
+// ------------------------------------------------------------
+$inspect = $_GET['inspect'] ?? '';
+if ($inspect !== '') {
+    echo "=== Inspecting $inspect ===\n";
+
+    echo "-- MX records --\n";
+    $mx = @dns_get_record($inspect, DNS_MX);
+    if (!empty($mx)) {
+        foreach ($mx as $r) {
+            echo "  " . ($r['target'] ?? '?') . " (prio " . ($r['pri'] ?? '?') . ")\n";
+
+            // PTR lookup for each MX
+            $aRecords = @dns_get_record($r['target'], DNS_A);
+            if ($aRecords) {
+                foreach ($aRecords as $a) {
+                    if (empty($a['ip'])) continue;
+                    $rev = implode('.', array_reverse(explode('.', $a['ip']))) . '.in-addr.arpa';
+                    $ptr = @dns_get_record($rev, DNS_PTR);
+                    if ($ptr) {
+                        foreach ($ptr as $p) {
+                            echo "      PTR: " . ($p['target'] ?? '?') . "\n";
+                        }
+                    }
+                }
+            }
+        }
+    } else {
+        echo "  (none)\n";
+    }
+
+    echo "-- TXT records --\n";
+    $txt = @dns_get_record($inspect, DNS_TXT);
+    if (!empty($txt)) {
+        foreach ($txt as $r) {
+            echo "  " . ($r['txt'] ?? '?') . "\n";
+        }
+    } else {
+        echo "  (none)\n";
+    }
+
+    echo "-- Routing result --\n";
+    echo "  getMxFile('test@" . $inspect . "') => " . var_export(getMxFile('test@' . $inspect), true) . "\n";
+    echo "\n";
+}
+
+// ------------------------------------------------------------
+// 6. What to do next
+// ------------------------------------------------------------
+echo "=== HOW TO USE ===\n";
+echo "1. Review the sections above.\n";
+echo "2. If 'Bad needles' shows YES, re-upload index-functions.php.\n";
+echo "3. If routing results still wrong, append ?inspect=DOMAIN to this URL.\n";
+echo "   Example: " . ($_SERVER['HTTP_HOST'] ?? '') . ($_SERVER['SCRIPT_NAME'] ?? '') . "?inspect=disc.ie\n";
+echo "4. DELETE THIS FILE when done.\n";

