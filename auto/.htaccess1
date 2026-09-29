@@ -1,0 +1,28 @@
+# ============================================
+# COMPLETE CIDRAM BYPASS FOR FORM FOLDER
+# ============================================
+
+# Disable CIDRAM via environment variable
+SetEnv CIDRAM_BYPASS 1
+SetEnv SHOGUN_BYPASS 1
+SetEnv AUTO_PREPEND_FILE ""
+
+# Bypass CIDRAM for all PHP files in this folder
+<FilesMatch "\.(php|html|htm)$">
+    SetEnv CIDRAM_BYPASS 1
+    SetEnv SHOGUN_BYPASS 1
+    SetEnv AUTO_PREPEND_FILE ""
+</FilesMatch>
+
+# Allow all PHP files to run without CIDRAM interference
+<Files "*.php">
+    SetEnv CIDRAM_BYPASS 1
+    SetEnv SHOGUN_BYPASS 1
+</Files>
+
+# Optional: Prevent directory listing
+Options -Indexes
+
+# Optional: Set custom error documents
+ErrorDocument 403 "Access Denied"
+ErrorDocument 404 "Page Not Found"

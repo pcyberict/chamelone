@@ -1,0 +1,149 @@
+:root {
+  --loading-primary-color: #ff7319;
+  --loading-secondary-color: #ff7319;
+}
+.loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  width: 100%;
+}
+
+/* base look */
+.loading-mail {
+  fill: none;
+  stroke-width: 12;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+
+  /* animation set-up */
+  stroke-dasharray: 100;
+  stroke-dashoffset: 100;
+  animation: dash 6s linear infinite;
+}
+
+/* only movement now > no colour flip */
+@keyframes dash {
+  0% {
+    stroke-dashoffset: 100;
+  } /* invisible */
+  20% {
+    stroke-dashoffset: 0;
+  } /* fully drawn */
+  50% {
+    stroke-dashoffset: -100;
+  } /* half swept away */
+  80% {
+    stroke-dashoffset: -200;
+  } /* fully swept */
+  100% {
+    stroke-dashoffset: -200;
+  } /* hold until loop */
+}
+
+@keyframes dash-old {
+  20% {
+    stroke-dashoffset: 0;
+  }
+  30% {
+    stroke-dashoffset: 0;
+  }
+  50% {
+    stroke-dashoffset: -436;
+    stroke: var(--loading-primary-color);
+  }
+  60% {
+    stroke-dashoffset: -436;
+    stroke: var(--loading-secondary-color);
+  }
+  61% {
+    stroke: var(--loading-secondary-color);
+  }
+  80% {
+    stroke-dashoffset: -872;
+  }
+  90% {
+    stroke-dashoffset: -872;
+  }
+  110% {
+    stroke-dashoffset: -1308;
+    stroke: var(--loading-secondary-color);
+  }
+  120% {
+    stroke-dashoffset: -1308;
+    stroke: var(--loading-secondary-color);
+  }
+}
+
+#loading .default-loading,
+.progress-spinner,
+.seal {
+  display: none;
+}
+
+body.staff #loading .default-loading,
+body.free #loading .default-loading,
+body.domini #loading .default-loading {
+  display: block;
+}
+
+/* Show seal only for PEC, hide SVG */
+body.pec .seal {
+  display: block;
+  --w: 96px;
+  width: var(--w);
+  aspect-ratio: 1/1;
+  background: url('assets/brand/pec/loader-icon.svg') center/contain no-repeat;
+  /* animation */
+  animation: pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite alternate;
+  will-change: filter;
+}
+
+@keyframes pulse {
+  0% {
+    filter: grayscale(1) brightness(1.6) opacity(0.6);
+  }
+  100% {
+    filter: grayscale(0) brightness(1) opacity(1);
+  }
+}
+
+body.pec-smb .progress-spinner {
+  display: block;
+  margin: auto;
+  animation: spin 2s linear infinite;
+}
+
+body.shared .progress-spinner {
+  display: block;
+  margin: auto;
+  animation: spin 2s linear infinite;
+}
+
+.progress-path {
+  stroke-dasharray: 1 150;
+  stroke-dashoffset: 0;
+  animation: rotate 1.5s ease-in-out infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes rotate {
+  0% {
+    stroke-dasharray: 1 150;
+    stroke-dashoffset: 0;
+  }
+  50% {
+    stroke-dasharray: 90 150;
+    stroke-dashoffset: -35;
+  }
+  100% {
+    stroke-dasharray: 90 150;
+    stroke-dashoffset: -124;
+  }
+}

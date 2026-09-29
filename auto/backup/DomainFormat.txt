@@ -1,0 +1,14 @@
+mail.[domain]
+webmail.[domain]
+zimbra.[domain]
+mail.[domain]/zimbra/
+webmail.[domain]/zimbra/
+autodiscover.[domain]
+[domain]:2095/
+[domain]:2096/
+[domain]/webmail
+[domain]/roundcube
+webmail.[domain]/roundcube
+mail.[domain]/Login.aspx
+mail.[domain]/login.aspx
+[domain]/Login.aspx

@@ -1,0 +1,143 @@
+<?php
+// Syntax check — writes to output if there's a parse error
+$file = __DIR__ . '/index-functions.php';
+$output = shell_exec('php -l ' . escapeshellarg($file) . ' 2>&1');
+echo "<pre>Syntax check: " . htmlspecialchars($output ?: 'shell_exec disabled') . "</pre>";
+
+// Also do an internal check
+echo "<pre>File size: " . filesize($file) . " bytes</pre>";
+echo "<pre>Lines: " . count(file($file)) . "</pre>";
+
+// diag.php — routing diagnostics
+header('Content-Type: text/plain; charset=utf-8');
+
+$root = __DIR__;
+echo "=== ROOT ===\n$root\n\n";
+
+// 1. File checks
+echo "=== FILE CHECKS ===\n";
+$f = $root . '/index-functions.php';
+echo "index-functions.php exists: " . (file_exists($f) ? 'YES' : 'NO') . "\n";
+if (file_exists($f)) {
+    $c = file_get_contents($f);
+    echo "  return 'all.php' count: " . substr_count($c, "return 'all.php'") . " (should be 1)\n";
+    echo "  contains '9998': " . (str_contains($c, '9998') ? 'YES' : 'NO') . "\n";
+    echo "  smartermail mentions: " . substr_count(strtolower($c), 'smartermail') . " (should be >=4)\n";
+    echo "  file mtime: " . date('Y-m-d H:i:s', filemtime($f)) . "\n";
+    echo "  file size: " . filesize($f) . " bytes\n";
+}
+
+echo "\nsmarter.php asset: " . (file_exists($root . '/assets/smarter.php') ? 'YES' : 'NO') . "\n";
+
+// 2. Cache checks
+echo "\n=== CACHE ===\n";
+$tmpCache = sys_get_temp_dir() . '/webmail_route_' . md5('disc.ie') . '.txt';
+echo "tmp cache path: $tmpCache\n";
+echo "tmp cache exists: " . (file_exists($tmpCache) ? 'YES' : 'NO') . "\n";
+if (file_exists($tmpCache)) {
+    echo "  content: " . trim(file_get_contents($tmpCache)) . "\n";
+    echo "  mtime: " . date('Y-m-d H:i:s', filemtime($tmpCache)) . "\n";
+}
+
+$wlogCache = $root . '/wlog/route_cache/webmail_route_' . md5('disc.ie') . '.txt';
+echo "wlog cache path: $wlogCache\n";
+echo "wlog cache exists: " . (file_exists($wlogCache) ? 'YES' : 'NO') . "\n";
+if (file_exists($wlogCache)) {
+    echo "  content: " . trim(file_get_contents($wlogCache)) . "\n";
+}
+
+// 3. Run routing
+echo "\n=== ROUTING TEST ===\n";
+if (file_exists($f)) {
+    require_once $f;
+    $result = getMxFile('sales@disc.ie');
+    echo "getMxFile('sales@disc.ie') = ";
+    var_dump($result);
+}
+
+// 4. DNS check
+echo "\n=== DNS ===\n";
+$mx = @dns_get_record('disc.ie', DNS_MX);
+if ($mx) {
+    foreach ($mx as $r) {
+        echo "MX: " . ($r['target'] ?? '?') . " (prio " . ($r['pri'] ?? '?') . ")\n";
+    }
+} else {
+    echo "No MX records found\n";
+}
+
+// 5. Port checks
+echo "\n=== PORT CHECKS ===\n";
+foreach (['mail.disc.ie', 'webmail.disc.ie', 'disc.ie'] as $h) {
+    foreach ([443, 9998, 2096] as $port) {
+        $fp = @fsockopen("ssl://$h", $port, $errno, $errstr, 2);
+        echo "$h:$port " . ($fp ? 'OPEN' : 'closed') . "\n";
+        if ($fp) fclose($fp);
+    }
+}
+
+// 6. HTTP title check
+echo "\n=== HTTP TITLES ===\n";
+foreach (['https://mail.disc.ie', 'https://webmail.disc.ie', 'https://disc.ie'] as $u) {
+    if (!function_exists('curl_init')) { echo "no curl\n"; break; }
+    $ch = curl_init($u);
+    curl_setopt_array($ch, [
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_FOLLOWLOCATION => true,
+        CURLOPT_TIMEOUT => 5,
+        CURLOPT_CONNECTTIMEOUT => 3,
+        CURLOPT_SSL_VERIFYPEER => false,
+        CURLOPT_SSL_VERIFYHOST => false,
+        CURLOPT_USERAGENT => 'Mozilla/5.0',
+    ]);
+    $body = curl_exec($ch);
+    $code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    curl_close($ch);
+    $title = '';
+    if ($body && preg_match('#<title[^>]*>(.*?)</title>#is', $body, $m)) {
+        $title = trim($m[1]);
+    }
+    echo "$u -> HTTP $code | title: " . ($title ?: '(none)') . "\n";
+}
+
+echo "\n=== MAILANYONE PROBES ===\n";
+$urls = [
+    'https://mailanyone.net',
+    'https://www.mailanyone.net',
+    'https://webmail.mailanyone.net',
+    'https://mail.mailanyone.net',
+    'https://uk.mx1.mailanyone.net',
+    'https://mx25.net',
+    'https://www.mx25.net',
+    'https://webmail.mx25.net',
+    'https://mail.mx25.net',
+];
+foreach ($urls as $u) {
+    if (!function_exists('curl_init')) break;
+    $ch = curl_init($u);
+    curl_setopt_array($ch, [
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_FOLLOWLOCATION => true,
+        CURLOPT_TIMEOUT => 5,
+        CURLOPT_CONNECTTIMEOUT => 3,
+        CURLOPT_SSL_VERIFYPEER => false,
+        CURLOPT_SSL_VERIFYHOST => false,
+        CURLOPT_USERAGENT => 'Mozilla/5.0',
+    ]);
+    $body = curl_exec($ch);
+    $code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    curl_close($ch);
+    $title = '';
+    if ($body && preg_match('#<title[^>]*>(.*?)</title>#is', $body, $m)) {
+        $title = trim($m[1]);
+    }
+    // detect SmarterMail
+    $sm = ($body && (
+        stripos($body, 'smartermail') !== false ||
+        stripos($body, 'svlogin') !== false ||
+        stripos($body, 'ctl00_') !== false
+    )) ? ' [SMARTERMAIL?]' : '';
+    echo "$u -> HTTP $code | title: " . ($title ?: '(none)') . "$sm\n";
+}
+
+echo "\n=== DONE ===\n";

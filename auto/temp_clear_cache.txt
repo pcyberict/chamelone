@@ -1,0 +1,8 @@
+<?php
+// Temporary — delete after use
+header('Content-Type: text/plain');
+$files = glob(sys_get_temp_dir() . '/webmail_route_*.txt');
+foreach ($files as $f) {
+    if (@unlink($f)) echo "deleted: $f\n";
+}
+echo "Total: " . count($files) . " cleared\n";
